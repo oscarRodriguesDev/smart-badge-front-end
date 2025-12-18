@@ -2,7 +2,7 @@
 
 import { Download, Share2, AlertTriangle, Lock, CheckCircle } from "lucide-react"
 import type { User, ReleaseStatus } from "@/lib/mock-data"
-import { DashboardLayout } from "@/components/layouts/dashboard-layout"
+import { DashboardLayout } from "../../components/layouts/dashboard-layout"
 
 interface DigitalBadgeProps {
   user: User
