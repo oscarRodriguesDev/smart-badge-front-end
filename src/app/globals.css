@@ -197,3 +197,14 @@
 .dark .border-border {
   @apply border-slate-700;
 }
+
+/* src/app/globals.css  (ou src/styles/globals.css, se for o seu caso) */
+
+@layer components {
+  .input-base {
+    @apply w-full rounded-lg border border-border bg-background
+    px-4 py-2 text-foreground placeholder:text-muted-foreground
+    focus:outline-none focus:ring-2 focus:ring-primary/40
+    focus:border-primary transition;
+  }
+}
