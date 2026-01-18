@@ -13,7 +13,7 @@ type Colaborador = {
   cargo: string
   setor?: string | null
   email?: string | null
-  foto?: string | null
+  urlPhoto?: string | null
   telefone?: string | null
   endereco?: string | null
   status?: string
@@ -41,28 +41,23 @@ export default function ColaboradorDetailPage() {
         const resp = await fetch(`/api/colaboradores/user?id=${params.id}`)
         if (!resp.ok) throw new Error("Colaborador não encontrado")
 
-        const data = await resp.json()
+    const data = await resp.json()
 
-        const raw = Array.isArray(data.colaborador)
-          ? data.colaborador.find((c: any) => c.id === params.id)
-          : data.colaborador
+setColaborador({
+  id: data.id,
+  nome: data.nome,
+  matricula: data.matricula,
+  cargo: data.cargo,
+  setor: data.setor,
+  email: data.email,
+  urlPhoto: data.urlPhoto,
+  telefone: data.telefone,
+  endereco: data.endereco,
+  status: data.situacaoGeral?.toLowerCase(),
+  dataAdmissao: data.createdAt,
+  treinamentos: data.treinamentos || [],
+})
 
-        if (!raw) throw new Error("Colaborador não encontrado")
-
-        setColaborador({
-          id: raw.id,
-          nome: raw.nome,
-          matricula: raw.matricula,
-          cargo: raw.cargo,
-          setor: raw.setor,
-          email: raw.email,
-          foto: raw.foto || raw.urlPhoto,
-          telefone: raw.telefone,
-          endereco: raw.endereco,
-          status: raw.situacaoGeral?.toLowerCase(),
-          dataAdmissao: raw.createdAt,
-          treinamentos: raw.treinamentos || [],
-        })
       } catch {
         setError("Erro ao buscar colaborador")
         setColaborador(null)
@@ -126,7 +121,7 @@ export default function ColaboradorDetailPage() {
         <div className="bg-surface border border-border rounded-lg p-6">
           <div className="flex gap-6 items-start mb-6">
             <img
-              src={colaborador.foto || "/placeholder.svg"}
+              src={colaborador.urlPhoto || "/placeholder.svg"}
               alt={colaborador.nome}
               className="w-24 h-24 rounded-lg object-cover border border-border"
             />
