@@ -12,10 +12,10 @@ type Colaborador = {
   cargo: string
   setor?: string
   email?: string
-  foto?: string | null
+  urlPhoto?: string | null
   telefone?: string
   endereco?: string
-  status?: string
+  situacaoGeral?: string
   dataAdmissao?: string
 }
 
@@ -62,7 +62,7 @@ export default function ColaboradoresPage() {
 
     const matchesStatus =
       filterStatus === "todos" ||
-      normalizedStatus(col.status) === filterStatus
+      normalizedStatus(col.situacaoGeral) === filterStatus
 
     return matchesSearch && matchesStatus
   })
@@ -148,7 +148,7 @@ export default function ColaboradoresPage() {
               >
                 <div className="flex gap-4 mb-4">
                   <img
-                    src={col.foto || "/placeholder.svg"}
+                    src={col.urlPhoto || "/placeholder.svg"}
                     alt={col.nome}
                     className="w-16 h-16 rounded-lg object-cover border border-border bg-white"
                   />
@@ -170,18 +170,18 @@ export default function ColaboradoresPage() {
 
                     <span
                       className={`text-xs font-medium px-2 py-1 rounded ${
-                        normalizedStatus(col.status) === "ativo"
+                        normalizedStatus(col.situacaoGeral) === "ativo"
                           ? "bg-success/10 text-success"
-                          : normalizedStatus(col.status) === "inativo"
+                          : normalizedStatus(col.situacaoGeral) === "inativo"
                           ? "bg-warning/10 text-warning"
                           : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {normalizedStatus(col.status) === "ativo"
+                      {normalizedStatus(col.situacaoGeral) === "ativo"
                         ? "Ativo"
-                        : normalizedStatus(col.status) === "inativo"
+                        : normalizedStatus(col.situacaoGeral) === "inativo"
                         ? "Inativo"
-                        : col.status || "?"}
+                        : col.situacaoGeral || "?"}
                     </span>
                   </div>
                 </div>

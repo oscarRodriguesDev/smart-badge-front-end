@@ -6,7 +6,7 @@ export interface User {
   badgeId: string
   cargo: string
   setor: string
-  foto: string
+  urlPhoto: string
   role: "colaborador" | "porteiro" | "rh" | "sst" | "gestor" | "admin"
   status: "ativo" | "inativo" | "bloqueado"
   badgeStatus: "liberado" | "bloqueado" | "suspenso"
@@ -85,7 +85,7 @@ export const mockUsers: Record<string, User> = {
     badgeId: "NFC-2024-00001",
     cargo: "Operador de Máquina",
     setor: "Produção",
-    foto: "/professional-man-headshot.png",
+    urlPhoto: "/professional-man-headshot.png",
     role: "colaborador",
     status: "ativo",
     badgeStatus: "liberado",
@@ -99,7 +99,7 @@ export const mockUsers: Record<string, User> = {
     badgeId: "NFC-2024-00002",
     cargo: "Porteiro",
     setor: "Portaria",
-    foto: "/professional-man-headshot.png",
+    urlPhoto: "/professional-man-headshot.png",
     role: "porteiro",
     status: "ativo",
     badgeStatus: "liberado",
@@ -113,7 +113,7 @@ export const mockUsers: Record<string, User> = {
     badgeId: "NFC-2024-00003",
     cargo: "Analista de RH",
     setor: "Recursos Humanos",
-    foto: "/professional-woman-headshot.png",
+    urlPhoto: "/professional-woman-headshot.png",
     role: "rh",
     status: "ativo",
     badgeStatus: "liberado",
@@ -127,7 +127,7 @@ export const mockUsers: Record<string, User> = {
     badgeId: "NFC-2024-00004",
     cargo: "Analista SST",
     setor: "Segurança do Trabalho",
-    foto: "/professional-man-headshot.png",
+    urlPhoto: "/professional-man-headshot.png",
     role: "sst",
     status: "ativo",
     badgeStatus: "liberado",
@@ -141,7 +141,7 @@ export const mockUsers: Record<string, User> = {
     badgeId: "NFC-2024-00005",
     cargo: "Gerente de Produção",
     setor: "Produção",
-    foto: "/professional-woman-headshot.png",
+    urlPhoto: "/professional-woman-headshot.png",
     role: "gestor",
     status: "ativo",
     badgeStatus: "liberado",
@@ -155,7 +155,7 @@ export const mockUsers: Record<string, User> = {
     badgeId: "NFC-2024-00000",
     cargo: "Administrador",
     setor: "TI",
-    foto: "/professional-man-headshot.png",
+    urlPhoto: "/professional-man-headshot.png",
     role: "admin",
     status: "ativo",
     badgeStatus: "liberado",

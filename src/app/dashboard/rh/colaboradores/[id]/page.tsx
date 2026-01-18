@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
+import Link from "next/link"
 import { DashboardLayout } from "../../../../../components/layouts/dashboard-layout"
 import { ArrowLeft, Edit2, FileText, CheckCircle } from "lucide-react"
 
@@ -119,6 +120,8 @@ export default function ColaboradorDetailPage() {
           <ArrowLeft className="w-4 h-4" />
           Voltar
         </button>
+
+     
 
         <div className="bg-surface border border-border rounded-lg p-6">
           <div className="flex gap-6 items-start mb-6">
@@ -243,6 +246,7 @@ export default function ColaboradorDetailPage() {
               </p>
             )}
           </div>
+          <Link href={`/itens/${params.id}`} className="text-primary underline">Adcionar items ao crachá</Link>
         </div>
       </div>
     </DashboardLayout>

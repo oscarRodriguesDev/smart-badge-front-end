@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 // Essa rota recupera todos os colaboradores do endpoint externo
 export async function GET() {
   try {
-    const resp = await fetch("http://localhost:3000/api/users/profile", {
+    const resp = await fetch(process.env.API_URL + "/api/users/profile", {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });

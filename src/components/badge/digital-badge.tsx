@@ -50,10 +50,11 @@ export function DigitalBadge({ user, releaseStatus, roleLabel, badgeColor }: Dig
           {/* Profile Section */}
           <div className="flex gap-6 mb-8">
             <img
-              src={user.foto || "/placeholder.svg"}
+              src={user.urlPhoto || "/placeholder.svg"}
               alt={user.nome}
               className="w-24 h-24 rounded-lg object-cover border-2 border-white/50"
             />
+            <h1>foto de perfil:{user.urlPhoto}</h1>
             <div>
               <p className="text-sm opacity-75 mb-1 font-semibold">NOME</p>
               <p className="text-xl font-bold mb-3">{user.nome}</p>

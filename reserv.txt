@@ -1,0 +1,187 @@
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { DashboardLayout } from "../../../../components/layouts/dashboard-layout"
+import { ArrowLeft, Save } from "lucide-react"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+export default function NovoColaboradorPage() {
+  const router = useRouter()
+
+  const [formData, setFormData] = useState({
+    cpf: "",
+    email: "",
+    senha: "senha_padrao",
+    nome: "",
+    matricula: "",
+    cargo: "",
+    setor: "",
+    role: "RH_USER",
+    asoStatus: "EM_DIA",
+    situacaoGeral: "ATIVO",
+
+    telefone: "",
+    endereco: "",
+    cidade: "",
+    estado: "",
+    cep: "",
+    pais: "Brasil",
+    complemento: "",
+    turno: "",
+
+    areasPermitidas: [] as string[],
+    niveisAcesso: [] as string[],
+    bloqueios: [] as string[],
+
+    asoUltimo: null as string | null,
+    asoVencimento: null as string | null,
+    asoRestricoes: null as string | null,
+
+    treinamentos: [] as any[],
+    certificacoes: [] as any[],
+    epis: [] as any[],
+    acidentes: [] as any[],
+    atestados: [] as any[],
+    ferias: null as any,
+
+    urlPhoto: null as string | null
+  })
+
+  const [submitted, setSubmitted] = useState(false)
+  const [uploading, setUploading] = useState(false)
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handlePhotoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+
+    const ext = file.name.split(".").pop()
+    const fileName = `${crypto.randomUUID()}.${ext}`
+    const path = `Axcess_Storage/colaboradores/${fileName}`
+
+    const { error } = await supabase.storage
+      .from("fotos-colaboradores")
+      .upload(path, file)
+
+    if (!error) {
+      const { data } = supabase.storage
+        .from("fotos-colaboradores")
+        .getPublicUrl(path)
+
+      setFormData(prev => ({
+        ...prev,
+        urlPhoto: data.publicUrl
+      }))
+    }
+
+    setUploading(false)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    const payload = {
+      ...formData,
+      matricula: formData.matricula || crypto.randomUUID(),
+      telefone: formData.telefone || null,
+      endereco: formData.endereco || null,
+      cidade: formData.cidade || null,
+      estado: formData.estado || null,
+      cep: formData.cep || null,
+      complemento: formData.complemento || null,
+      turno: formData.turno || null,
+      asoUltimo: formData.asoUltimo ? new Date(formData.asoUltimo) : null,
+      asoVencimento: formData.asoVencimento ? new Date(formData.asoVencimento) : null,
+      asoRestricoes: formData.asoRestricoes || null
+    }
+
+    await fetch("/api/colaboradores/cadastro", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+
+    setSubmitted(true)
+
+    setTimeout(() => {
+      router.push("/dashboard/rh/colaboradores")
+    }, 1500)
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="p-4 max-w-4xl mx-auto space-y-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-primary"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar
+        </button>
+
+        {!submitted ? (
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Foto</h2>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="input-base"
+              />
+
+              {uploading && <p>Enviando foto...</p>}
+
+              {formData.urlPhoto && (
+                <img
+                  src={formData.urlPhoto}
+                  className="w-32 h-32 rounded-lg object-cover"
+                />
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input name="nome" className="input-base" placeholder="Nome" onChange={handleChange} />
+              <input name="cpf" className="input-base" placeholder="CPF" onChange={handleChange} />
+              <input name="email" className="input-base" placeholder="Email" onChange={handleChange} />
+              <input name="telefone" className="input-base" placeholder="Telefone" onChange={handleChange} />
+              <input name="endereco" className="input-base" placeholder="Endereço" onChange={handleChange} />
+              <input name="cidade" className="input-base" placeholder="Cidade" onChange={handleChange} />
+              <input name="estado" className="input-base" placeholder="Estado" onChange={handleChange} />
+              <input name="cep" className="input-base" placeholder="CEP" onChange={handleChange} />
+              <input name="cargo" className="input-base" placeholder="Cargo" onChange={handleChange} />
+              <input name="setor" className="input-base" placeholder="Setor" onChange={handleChange} />
+              <input name="matricula" className="input-base" placeholder="Matrícula" onChange={handleChange} />
+              <input name="turno" className="input-base" placeholder="Turno" onChange={handleChange} />
+            </div>
+
+            <button type="submit" className="flex items-center gap-2 px-4 py-2 bg-primary rounded-lg">
+              <Save className="w-4 h-4" />
+              Cadastrar
+            </button>
+          </form>
+        ) : (
+          <div className="p-10 text-center">✓ Cadastro realizado</div>
+        )}
+      </div>
+    </DashboardLayout>
+  )
+}

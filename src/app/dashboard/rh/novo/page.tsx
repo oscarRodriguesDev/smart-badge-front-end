@@ -1,3 +1,4 @@
+
 "use client"
 
 import type React from "react"
@@ -5,12 +6,17 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { DashboardLayout } from "../../../../components/layouts/dashboard-layout"
 import { ArrowLeft, Save } from "lucide-react"
+import { createClient } from "@supabase/supabase-js"
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export default function NovoColaboradorPage() {
   const router = useRouter()
 
   const [formData, setFormData] = useState({
-    // obrigatórios no Prisma
     cpf: "",
     email: "",
     senha: "senha_padrao",
@@ -18,11 +24,10 @@ export default function NovoColaboradorPage() {
     matricula: "",
     cargo: "",
     setor: "",
-    role: "RH_USER", // ENUM VÁLIDO DO PRISMA
+    role: "RH_USER",
     asoStatus: "EM_DIA",
     situacaoGeral: "ATIVO",
-
-    // opcionais
+    ItensPermitidos: [] as string[],
     telefone: "",
     endereco: "",
     cidade: "",
@@ -32,17 +37,14 @@ export default function NovoColaboradorPage() {
     complemento: "",
     turno: "",
 
-    // arrays obrigatórios
     areasPermitidas: [] as string[],
     niveisAcesso: [] as string[],
     bloqueios: [] as string[],
 
-    // datas
     asoUltimo: null as string | null,
     asoVencimento: null as string | null,
     asoRestricoes: null as string | null,
 
-    // relações
     treinamentos: [] as any[],
     certificacoes: [] as any[],
     epis: [] as any[],
@@ -50,12 +52,11 @@ export default function NovoColaboradorPage() {
     atestados: [] as any[],
     ferias: null as any,
 
-    // mídia
-    urlPhoto: null as string | null,
-    foto: null as string | null
+    urlPhoto: null as string | null
   })
 
   const [submitted, setSubmitted] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -63,6 +64,41 @@ export default function NovoColaboradorPage() {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
   }
+
+  const handlePhotoChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+
+    const ext = file.name.split(".").pop()
+    const fileName = `${crypto.randomUUID()}.${ext}`
+    const filePath = `colaboradores/${fileName}`
+
+    const { data: uploadData, error: uploadError } =
+      await supabase.storage
+        .from("Axcess_Storage")
+        .upload(filePath, file)
+
+    if (uploadError) {
+      setUploading(false)
+      return
+    }
+
+    const { data: publicData } = supabase.storage
+      .from("Axcess_Storage")
+      .getPublicUrl(filePath)
+
+    setFormData(prev => ({
+      ...prev,
+      urlPhoto: publicData.publicUrl
+    }))
+
+    setUploading(false)
+  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,7 +114,9 @@ export default function NovoColaboradorPage() {
       complemento: formData.complemento || null,
       turno: formData.turno || null,
       asoUltimo: formData.asoUltimo ? new Date(formData.asoUltimo) : null,
-      asoVencimento: formData.asoVencimento ? new Date(formData.asoVencimento) : null
+      asoVencimento: formData.asoVencimento ? new Date(formData.asoVencimento) : null,
+      urlPhoto: formData.urlPhoto,
+      itensViculados : formData.ItensPermitidos || null,
     }
 
     await fetch("/api/colaboradores/cadastro", {
@@ -99,7 +137,7 @@ export default function NovoColaboradorPage() {
       <div className="p-4 lg:p-6 max-w-4xl mx-auto space-y-6">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-primary hover:opacity-80 transition"
+          className="flex items-center gap-2 text-primary"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar
@@ -108,8 +146,28 @@ export default function NovoColaboradorPage() {
         {!submitted ? (
           <form
             onSubmit={handleSubmit}
-            className="rounded-xl border border-border bg-background p-6 lg:p-8 space-y-8"
+            className="rounded-xl border bg-background p-6 lg:p-8 space-y-8"
           >
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">Foto de perfil</h2>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="input-base"
+              />
+
+              {uploading && <p>Enviando foto...</p>}
+
+              {formData.urlPhoto && (
+                <img
+                  src={formData.urlPhoto}
+                  className="w-32 h-32 rounded-lg object-cover border"
+                />
+              )}
+            </div>
+
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Dados pessoais</h2>
 
@@ -125,45 +183,46 @@ export default function NovoColaboradorPage() {
               </div>
             </div>
 
-            <div className="space-y-4 border-t border-border pt-6">
+            <div className="space-y-4 border-t pt-6">
               <h2 className="text-lg font-semibold">Dados profissionais</h2>
+
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="input-base"
+              >
+                <option value="RH_USER">RH User</option>
+                <option value="RH_ADMIN">RH Admin</option>
+                <option value="SESMT_USER">SESMT User</option>
+                <option value="SESMT_ADMIN">SESMT Admin</option>
+                <option value="OP">Operacional</option>
+                <option value="CONTROLER">Controler</option>
+                <option value="GENERAL_ADMIN">Admin Geral</option>
+                <option value="ADMIN_SYSTEM">Admin Sistema</option>
+              </select>
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input className="input-base" name="cargo" placeholder="Cargo" value={formData.cargo} onChange={handleChange} />
                 <input className="input-base" name="setor" placeholder="Setor" value={formData.setor} onChange={handleChange} />
                 <input className="input-base" name="matricula" placeholder="Matrícula" value={formData.matricula} onChange={handleChange} />
                 <input className="input-base" name="turno" placeholder="Turno" value={formData.turno} onChange={handleChange} />
-
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="input-base"
-                >
-                  <option value="RH_USER">RH User</option>
-                  <option value="RH_ADMIN">RH Admin</option>
-                  <option value="SESMT_USER">SESMT User</option>
-                  <option value="SESMT_ADMIN">SESMT Admin</option>
-                  <option value="OP">Operacional</option>
-                  <option value="CONTROLER">Controler</option>
-                  <option value="GENERAL_ADMIN">Admin Geral</option>
-                  <option value="ADMIN_SYSTEM">Admin Sistema</option>
-                </select>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-border">
+            <div className="flex gap-4 pt-6 border-t">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 rounded-lg border border-border bg-muted px-4 py-2"
+                className="flex-1 rounded-lg border px-4 py-2"
               >
                 Cancelar
               </button>
 
               <button
                 type="submit"
-                className="flex-1 rounded-lg bg-primary px-4 py-2 text-primary-foreground flex items-center justify-center gap-2"
+                className="flex-1 rounded-lg bg-primary px-4 py-2 flex items-center justify-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Cadastrar
@@ -171,7 +230,7 @@ export default function NovoColaboradorPage() {
             </div>
           </form>
         ) : (
-          <div className="rounded-xl border border-success/30 bg-success/10 p-10 text-center">
+          <div className="rounded-xl border p-10 text-center">
             <div className="text-4xl mb-2">✓</div>
             <p>Cadastro realizado</p>
           </div>

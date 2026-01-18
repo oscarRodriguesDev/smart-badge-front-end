@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     const data = await request.json();
 
     // Envia os dados para o endpoint externo
-    const resp = await fetch("http://localhost:3000/api/users/profile", {
+    const resp = await fetch(process.env.API_URL + "/api/users/profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
