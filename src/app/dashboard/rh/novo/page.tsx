@@ -16,6 +16,10 @@ const supabase = createClient(
 export default function NovoColaboradorPage() {
   const router = useRouter()
 
+  const agora = new Date()
+
+
+
   const [formData, setFormData] = useState({
     cpf: "",
     email: "",
@@ -100,37 +104,44 @@ export default function NovoColaboradorPage() {
   }
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
 
-    const payload = {
-      ...formData,
-      matricula: formData.matricula || crypto.randomUUID(),
-      telefone: formData.telefone || null,
-      endereco: formData.endereco || null,
-      cidade: formData.cidade || null,
-      estado: formData.estado || null,
-      cep: formData.cep || null,
-      complemento: formData.complemento || null,
-      turno: formData.turno || null,
-      asoUltimo: formData.asoUltimo ? new Date(formData.asoUltimo) : null,
-      asoVencimento: formData.asoVencimento ? new Date(formData.asoVencimento) : null,
-      urlPhoto: formData.urlPhoto,
-      itensViculados : formData.ItensPermitidos || null,
-    }
+  const agora = new Date()
 
-    await fetch("/api/colaboradores/cadastro", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    })
-
-    setSubmitted(true)
-
-    setTimeout(() => {
-      router.push("/dashboard/rh/colaboradores")
-    }, 1500)
+  const payload = {
+    ...formData,
+    matricula: formData.matricula || crypto.randomUUID(),
+    telefone: formData.telefone || null,
+    endereco: formData.endereco || null,
+    cidade: formData.cidade || null,
+    estado: formData.estado || null,
+    cep: formData.cep || null,
+    complemento: formData.complemento || null,
+    turno: formData.turno || null,
+    asoUltimo: agora,
+    asoVencimento: new Date(
+      agora.getFullYear() + 1,
+      agora.getMonth(),
+      agora.getDate()
+    ),
+    urlPhoto: formData.urlPhoto,
+    itensViculados: formData.ItensPermitidos || null,
   }
+
+  await fetch("/api/colaboradores/cadastro", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+
+  setSubmitted(true)
+
+  setTimeout(() => {
+    router.push("/dashboard/rh/colaboradores")
+  }, 1500)
+}
+
 
   return (
     <DashboardLayout>
